@@ -37,7 +37,6 @@ services:
         value: ./uploads
   - type: static_site
     name: survey-analytics-frontend
-    env: node
     plan: starter
     branch: main
     rootDir: frontend
