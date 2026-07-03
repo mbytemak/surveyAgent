@@ -63,9 +63,18 @@ app.post('/api/upload', express.text(), async (req, res) => {
   }
 });
 
-// Start server
-const server = app.listen(PORT, () => {
+// Start server after running migrations
+const server = app.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`);
+
+  try {
+    const { runMigrations } = await import('../migrations/001_init');
+    await runMigrations();
+    console.log('Database migrations completed');
+  } catch (error) {
+    console.error('Failed to run migrations during startup:', error);
+    process.exit(1);
+  }
 
   // Start CSV watcher
   watchCSVFolder(CSV_UPLOAD_PATH, 30000); // Check every 30 seconds
