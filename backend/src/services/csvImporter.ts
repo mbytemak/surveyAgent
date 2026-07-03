@@ -123,7 +123,8 @@ export async function importCSV(filePath: string): Promise<{ imported: number; s
           const q1Value = record.q1 && record.q1 !== '' ? parseInt(String(record.q1), 10) : null;
 
           const topics = record.q2 ? extractBasicTopics(record.q2) : [];
-          const sentiment = 0.5;
+          const sentiment = null;
+          const severity = null;
 
           await client.query(
             `INSERT INTO survey_responses 
@@ -146,7 +147,7 @@ export async function importCSV(filePath: string): Promise<{ imported: number; s
               record.q10 || null,
               sentiment,
               topics.length > 0 ? topics : null,
-              'neutral',
+              severity,
             ]
           );
 
