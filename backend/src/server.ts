@@ -68,7 +68,7 @@ const server = app.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`);
 
   try {
-    const { runMigrations } = await import('../migrations/001_init');
+    const { runMigrations } = await import('./migrations/001_init');
     await runMigrations();
     console.log('Database migrations completed');
   } catch (error) {

@@ -1,4 +1,4 @@
-import pool from '../src/models/db';
+import pool from '../models/db';
 
 export async function runMigrations() {
   console.log('Running migrations...');
