@@ -114,6 +114,30 @@
   padding: 40px;
 }
 
+.upload-card {
+  margin-bottom: 24px;
+  padding: 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.upload-card h2 {
+  margin: 0 0 12px 0;
+  font-size: 20px;
+  color: #1a1a1a;
+}
+
+.upload-card input[type="file"] {
+  display: block;
+  margin-top: 12px;
+}
+
+.upload-message {
+  margin-top: 12px;
+  color: #2563eb;
+}
+
 .error {
   color: #ef4444;
   padding: 20px;

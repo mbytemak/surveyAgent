@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, ChangeEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { surveyAPI } from '../api/client';
+import { surveyAPI, uploadAPI } from '../api/client';
 import { Survey } from '../types';
 import './Home.css';
 
@@ -8,6 +8,8 @@ export default function Home() {
   const [surveys, setSurveys] = useState<Survey[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [uploadMessage, setUploadMessage] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     const fetchSurveys = async () => {
@@ -33,6 +35,36 @@ export default function Home() {
       <div className="header">
         <h1>📊 Survey Analytics Dashboard</h1>
         <p>View and analyze customer satisfaction survey responses</p>
+      </div>
+
+      <div className="upload-card">
+        <h2>Upload survey CSV</h2>
+        <input
+          type="file"
+          accept=".csv"
+          onChange={async (event: ChangeEvent<HTMLInputElement>) => {
+            const file = event.target.files?.[0];
+            if (!file) return;
+
+            setUploading(true);
+            setUploadMessage(null);
+
+            try {
+              const text = await file.text();
+              const response = await uploadAPI.uploadCSV(text);
+              setUploadMessage(response.data?.message || 'Upload successful.');
+              setError(null);
+              setTimeout(() => window.location.reload(), 1500);
+            } catch (uploadError) {
+              console.error(uploadError);
+              setUploadMessage('Upload failed.');
+            } finally {
+              setUploading(false);
+            }
+          }}
+        />
+        {uploading && <p>Uploading CSV...</p>}
+        {uploadMessage && <p className="upload-message">{uploadMessage}</p>}
       </div>
 
       <div className="surveys-grid">
