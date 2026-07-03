@@ -39,6 +39,10 @@ export default function Home() {
 
       <div className="upload-card">
         <h2>Upload survey CSV</h2>
+        <p className="upload-hint">
+          Upload a CSV file with these required headers: <strong>runId, uniqueId, q1, q2</strong>.
+          Ratings should be numeric (1-10) and comments should be in the <strong>q2</strong> field.
+        </p>
         <input
           type="file"
           accept=".csv"
