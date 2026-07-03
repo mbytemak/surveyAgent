@@ -1,0 +1,56 @@
+services:
+  - type: web_service
+    name: survey-analytics-backend
+    env: node
+    plan: starter
+    branch: main
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: "3001"
+      - key: DB_HOST
+        fromDatabase:
+          name: survey-analytics-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: survey-analytics-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: survey-analytics-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: survey-analytics-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: survey-analytics-db
+          property: password
+      - key: NODE_ENV
+        value: production
+      - key: CSV_UPLOAD_PATH
+        value: ./uploads
+  - type: static_site
+    name: survey-analytics-frontend
+    env: node
+    plan: starter
+    branch: main
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    publishPath: dist
+    autoDeploy: true
+    envVars:
+      - key: VITE_API_URL
+        value: https://survey-analytics-backend.onrender.com
+
+databases:
+  - name: survey-analytics-db
+    engine: postgres
+    version: "15"
+    plan: starter
+    region: oregon
