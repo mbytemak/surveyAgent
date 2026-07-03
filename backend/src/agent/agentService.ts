@@ -28,7 +28,7 @@ export async function queryAgent(runId: string, question: string): Promise<Agent
 
     // Get all responses for context
     const responsesResult = await pool.query(
-      `SELECT q1, q2, sentiment, topics, severity FROM survey_responses 
+      `SELECT unique_id, q1, q2, sentiment, topics, severity FROM survey_responses 
        WHERE survey_id = $1
        ORDER BY created_at DESC`,
       [surveyId]
@@ -46,14 +46,12 @@ export async function queryAgent(runId: string, question: string): Promise<Agent
       messages: [
         {
           role: 'system',
-          content: `You are an AI agent analyzing customer survey feedback. 
-You have access to survey response data including ratings (1-10), comments, sentiment scores (0-1), and extracted topics.
-Provide clear, concise answers to user questions about the survey data.
+          content: `You are an AI agent analyzing customer survey feedback. The data below includes customer identifiers (unique_id), ratings (q1), comments (q2), sentiment scores, topics, and severity. Answer questions only from this data and do not invent values. If a question cannot be answered from the provided survey data, say so clearly.
 Format your response as: [ANSWER] followed by [DATA_POINTS] as key-value pairs.`,
         },
         {
           role: 'user',
-          content: `Survey Context:\n${context}\n\nQuestion: ${question}`,
+          content: `Survey Data:\n${context}\n\nQuestion: ${question}`,
         },
       ],
       temperature: 0.5,
@@ -114,18 +112,13 @@ function buildContext(responses: any[]): string {
     .map((t) => `${t[0]} (${t[1]} mentions)`)
     .join(', ');
 
-  // Get sample comments
-  const positiveComments = responses
-    .filter((r) => r.sentiment > 0.6 && r.q2)
-    .slice(0, 2)
-    .map((r) => `"${r.q2}"`)
-    .join(' | ');
-
-  const negativeComments = responses
-    .filter((r) => r.sentiment < 0.4 && r.q2)
-    .slice(0, 2)
-    .map((r) => `"${r.q2}"`)
-    .join(' | ');
+  const responseRows = responses
+    .slice(0, 20)
+    .map((r) => {
+      const topics = Array.isArray(r.topics) ? r.topics.join(', ') : r.topics || 'None';
+      return `- ${r.unique_id}: rating=${r.q1 ?? 'N/A'}, sentiment=${r.sentiment ?? 'N/A'}, severity=${r.severity ?? 'N/A'}, topics=[${topics}], comment="${r.q2 || ''}"`;
+    })
+    .join('\n');
 
   return `
 Total Responses: ${totalResponses}
@@ -136,7 +129,7 @@ Critical Issues: ${criticalCount}
 
 Top Topics: ${topTopics}
 
-Sample Positive Comments: ${positiveComments || 'None'}
-Sample Negative Comments: ${negativeComments || 'None'}
+Sample Response Rows (first ${Math.min(20, totalResponses)}):
+${responseRows}
 `;
 }
