@@ -10,6 +10,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [uploadMessage, setUploadMessage] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [processingStatus, setProcessingStatus] = useState<{ pending: boolean; count: number } | null>(null);
 
   useEffect(() => {
     const fetchSurveys = async () => {
@@ -24,8 +25,37 @@ export default function Home() {
       }
     };
 
+    const fetchProcessingStatus = async () => {
+      try {
+        const status = await uploadAPI.getStatus();
+        setProcessingStatus(status.data);
+      } catch (err) {
+        console.error('Failed to fetch processing status', err);
+      }
+    };
+
     fetchSurveys();
+    fetchProcessingStatus();
   }, []);
+
+  useEffect(() => {
+    if (!processingStatus?.pending) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const status = await uploadAPI.getStatus();
+        setProcessingStatus(status.data);
+        if (!status.data.pending) {
+          clearInterval(interval);
+          window.location.reload();
+        }
+      } catch (err) {
+        console.error('Failed to refresh processing status', err);
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [processingStatus?.pending]);
 
   if (loading) return <div className="container"><p>Loading surveys...</p></div>;
   if (error) return <div className="container error">{error}</div>;
@@ -68,6 +98,11 @@ export default function Home() {
           }}
         />
         {uploading && <p>Uploading CSV...</p>}
+        {processingStatus?.pending && (
+          <p className="upload-message">
+            Processing uploaded data... {processingStatus.count} file(s) pending. The page will refresh automatically when complete.
+          </p>
+        )}
         {uploadMessage && <p className="upload-message">{uploadMessage}</p>}
       </div>
 

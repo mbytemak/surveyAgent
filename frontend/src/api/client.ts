@@ -32,4 +32,5 @@ export const uploadAPI = {
     client.post('/upload', csvContent, {
       headers: { 'Content-Type': 'text/plain' },
     }),
+  getStatus: () => client.get<{ pending: boolean; count: number; files: string[] }>('/processing-status'),
 };

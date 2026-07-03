@@ -63,6 +63,22 @@ app.post('/api/upload', express.text(), async (req, res) => {
   }
 });
 
+// Processing status endpoint
+app.get('/api/processing-status', async (req, res) => {
+  try {
+    if (!fs.existsSync(CSV_UPLOAD_PATH)) {
+      return res.json({ pending: false, count: 0, files: [] });
+    }
+
+    const files = fs.readdirSync(CSV_UPLOAD_PATH).filter((name) => name.endsWith('.csv'));
+    const pending = files.length > 0;
+    res.json({ pending, count: files.length, files });
+  } catch (error) {
+    console.error('Processing status error:', error);
+    res.status(500).json({ error: 'Failed to determine processing status' });
+  }
+});
+
 // Start server after running migrations
 const server = app.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`);
