@@ -2,13 +2,13 @@
   "name": "survey-analytics-backend",
   "version": "1.0.0",
   "description": "Survey comment analytics with AI agent",
-  "main": "dist/server.js",
+  "main": "dist/src/server.js",
   "scripts": {
     "dev": "ts-node-dev --respawn src/server.ts",
     "build": "tsc",
     "postinstall": "npm run build",
     "prestart": "npm run build",
-    "start": "node dist/server.js",
+    "start": "node dist/src/server.js",
     "migrate": "ts-node migrations/001_init.ts",
     "lint": "eslint src --ext .ts"
   },
